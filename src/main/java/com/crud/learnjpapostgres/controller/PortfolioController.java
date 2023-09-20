@@ -3,44 +3,86 @@ package com.crud.learnjpapostgres.controller;
 import com.crud.learnjpapostgres.domain.dao.Portfolio;
 import com.crud.learnjpapostgres.domain.dto.PortfolioDto;
 import com.crud.learnjpapostgres.service.PortfolioService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.models.OpenAPI;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
-@RequestMapping("/portfolio")
+@RequestMapping("/api/portfolio")
 public class PortfolioController {
     private final PortfolioService portfolioService;
+    private final ModelMapper modelMapper;
 
-    @Autowired
-    public PortfolioController(PortfolioService portfolioService) {
+    //    @Autowired
+    public PortfolioController(PortfolioService portfolioService, ModelMapper modelMapper) {
         this.portfolioService = portfolioService;
+        this.modelMapper = modelMapper;
     }
 
-    @PostMapping("/create")
-    public PortfolioDto create(@RequestBody PortfolioDto request){
-//        final Portfolio portfolio = portfolioService.mapToEntity(request);
-        final Portfolio result = portfolioService.create(portfolioService.mapToEntity(request));
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create Portfolio")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "success")
+    })
+    public PortfolioDto create(@RequestBody PortfolioDto request) {
+        Portfolio portfolio = modelMapper.map(request, Portfolio.class);
+        portfolioService.create(portfolio);
 
-        return portfolioService.mapToDto(result);
+        log.info("portfolio : {}", portfolio);
+        return modelMapper.map(portfolio, PortfolioDto.class);
     }
 
-    @PutMapping("/update/{id}")
-    public PortfolioDto update(@PathVariable Long id, @RequestBody PortfolioDto request){
-        final Portfolio result = portfolioService.update(id,portfolioService.mapToEntity(request));
-
-        return portfolioService.mapToDto(result);
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update Portfolio")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "success")
+    })
+    public PortfolioDto update(@PathVariable Long id, @RequestBody PortfolioDto request) {
+        Portfolio portfolio = modelMapper.map(request, Portfolio.class);
+        portfolioService.update(id, portfolio);
+        return modelMapper.map(portfolio, PortfolioDto.class);
     }
 
-    @GetMapping("/get-all")
-    public List<PortfolioDto> findAll(){
-        return portfolioService.findAll().stream().map(portfolioService::mapToDto).collect(Collectors.toList());
+    @GetMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get All Portfolio")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "success")
+    })
+    public List<PortfolioDto> findAll() {
+//        return portfolioService.findAll().stream().map(portfolioService::mapToDto).collect(Collectors.toList());
+        List<Portfolio> result = portfolioService.findAll();
+
+        return result.stream()
+                .map(portfolio -> modelMapper.map(portfolio, PortfolioDto.class))
+                .collect(Collectors.toList());
     }
 
-    @DeleteMapping("/delete/{id}")
-    public Boolean delete(@PathVariable Long id){
+    @GetMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get One Portfolio")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "success")
+    })
+    public PortfolioDto findById(@PathVariable Long id) {
+        Portfolio result = portfolioService.findById(id);
+
+        return modelMapper.map(result, PortfolioDto.class);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    @Operation(summary = "Delete Portfolio")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "success")
+    })
+    public Boolean delete(@PathVariable Long id) {
         return portfolioService.delete(id);
     }
 }

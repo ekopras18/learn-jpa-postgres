@@ -1,7 +1,23 @@
 package com.crud.learnjpapostgres.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import java.util.Date;
-@JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss", timezone = "Asia/Jakarta")
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record PortfolioDto(String name, String description, String category, String image, Date date, String url) {}
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PortfolioDto {
+    private long id;
+    private String name;
+    private String description;
+    private String category;
+    private String image;
+    private LocalDateTime date;
+    private String url;
+
+}
